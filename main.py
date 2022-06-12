@@ -46,7 +46,7 @@ def update_Y(K, A, L):
     return K**alpha * (A * L) ** (1 - alpha)
 
 
-def update_A(Y, K, A, L, t, t_delta):
+def get_A(t):
     return A_0 * np.exp(g * t)
 
 
@@ -83,7 +83,8 @@ k_series = np.array(
         for t in times
     ]
 )
-y_series = ...  # todo: calculate 'y' (this can be done directly from `k_series`)
+
+y_series = k_series ** alpha * np.array([get_A(t_delta * i) for i in range(steps)]) ** beta
 
 param_history = defaultdict(list)
 times = []
@@ -102,7 +103,7 @@ for i in range(steps):
     Y = update_Y(prev_K, prev_A, prev_L)
     K = update_K(prev_Y, prev_K, prev_A, prev_L, t, t_delta)
     L = update_L(prev_Y, prev_K, prev_A, prev_L, t, t_delta)
-    A = update_A(prev_Y, prev_K, prev_A, prev_L, t, t_delta)
+    A = get_A(t)
     prev_A = A
     prev_Y = Y
     prev_K = K
@@ -122,16 +123,27 @@ for i in range(steps):
 for name, history in param_history.items():
     plt.plot(times, history)
     plt.title(name + " (symulacja)")
+    plt.savefig(name + "_simulated")
     plt.show()
 
 plt.plot(times, k_series)
 plt.title("k (suma szeregu)")
+plt.savefig("k_sum")
 plt.show()
 
 k_simulation = np.array(param_history["k"])
 plt.plot(times, k_series - k_simulation)
 plt.title("k (różnica)")
+plt.savefig("k_difference")
 plt.show()
 
-# todo: add plots for 'y': "y (suma szeregu)" and "y (różnica)"
-# todo: save all figures to use in LATEX
+plt.plot(times, y_series)
+plt.title("y (suma szeregu)")
+plt.savefig("y_sum")
+plt.show()
+
+y_simulation = np.array(param_history["y"])
+plt.plot(times, y_series - y_simulation)
+plt.title("y (różnica)")
+plt.savefig("y_difference")
+plt.show()
